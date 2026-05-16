@@ -49,82 +49,105 @@ class _MoodTrackerHomeState extends State<MoodTrackerHome> {
         elevation: 0,
         backgroundColor: Colors.transparent,
       ),
-      body: Center(
-        child: Container(
-          // Strict spec: Web layout bounded to max-width 600
-          constraints: const BoxConstraints(maxWidth: 600),
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              const SizedBox(height: 40),
-              const Text(
-                'How are you feeling right now?',
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.blueGrey,
+      body: Column(
+        children: [
+          // Top Section: Constrained for readability
+          Expanded(
+            child: Center(
+              child: Container(
+                constraints: const BoxConstraints(maxWidth: 600),
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text(
+                      'How are you feeling right now?',
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.blueGrey,
+                      ),
+                    ),
+                    const SizedBox(height: 48),
+                    // Mood Logging Buttons
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: MoodType.values
+                          .map((type) => _MoodButton(
+                                type: type,
+                                onTap: () => _moodProvider.logMood(type),
+                              ))
+                          .toList(),
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(height: 48),
-              
-              // Mood Logging Buttons
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: MoodType.values.map((type) => _MoodButton(
-                  type: type,
-                  onTap: () => _moodProvider.logMood(type),
-                )).toList(),
-              ),
-              
-              const Spacer(),
-              
-              // Timeline Section
-              const Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  'Recent Vibes (Past 7)',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.blueGrey,
+            ),
+          ),
+
+          // Timeline Section: Full Width of the screen
+          Container(
+            padding: const EdgeInsets.symmetric(vertical: 32),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.03),
+                  blurRadius: 20,
+                  offset: const Offset(0, -10),
+                ),
+              ],
+            ],
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 24),
+                  child: Text(
+                    'Recent Vibes (Past 7)',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.blueGrey,
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(height: 16),
-              
-              // Timeline List: Uses ListenableBuilder to react to provider changes
-              SizedBox(
-                height: 220,
-                child: ListenableBuilder(
-                  listenable: _moodProvider,
-                  builder: (context, child) {
-                    final entries = _moodProvider.lastSevenEntries;
-                    
-                    if (entries.isEmpty) {
-                      return const Center(
-                        child: Text(
-                          'No entries yet. Tap a face above to start!',
-                          style: TextStyle(color: Colors.grey, fontStyle: FontStyle.italic),
-                        ),
+                const SizedBox(height: 16),
+                // Timeline List: Uses ListenableBuilder to react to provider changes
+                SizedBox(
+                  height: 220,
+                  child: ListenableBuilder(
+                    listenable: _moodProvider,
+                    builder: (context, child) {
+                      final entries = _moodProvider.lastSevenEntries;
+
+                      if (entries.isEmpty) {
+                        return const Center(
+                          child: Text(
+                            'No entries yet. Tap a face above to start!',
+                            style: TextStyle(
+                                color: Colors.grey,
+                                fontStyle: FontStyle.italic),
+                          ),
+                        );
+                      }
+
+                      return ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        physics: const BouncingScrollPhysics(),
+                        itemCount: entries.length,
+                        itemBuilder: (context, index) {
+                          return TimelineCard(entry: entries[index]);
+                        },
                       );
-                    }
-                    
-                    return ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      physics: const BouncingScrollPhysics(),
-                      itemCount: entries.length,
-                      itemBuilder: (context, index) {
-                        return TimelineCard(entry: entries[index]);
-                      },
-                    );
-                  },
+                    },
+                  ),
                 ),
-              ),
-              const SizedBox(height: 60),
-            ],
+              ],
+            ),
           ),
-        ),
+        ],
       ),
     );
   }
