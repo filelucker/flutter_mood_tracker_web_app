@@ -49,73 +49,55 @@ class _MoodTrackerHomeState extends State<MoodTrackerHome> {
         elevation: 0,
         backgroundColor: Colors.transparent,
       ),
-      body: Column(
-        children: [
-          // Top Section: Constrained for readability
-          Expanded(
-            child: Center(
-              child: Container(
-                constraints: const BoxConstraints(maxWidth: 600),
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Text(
-                      'How are you feeling right now?',
-                      style: TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.blueGrey,
-                      ),
-                    ),
-                    const SizedBox(height: 48),
-                    // Mood Logging Buttons
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: MoodType.values
-                          .map((type) => _MoodButton(
-                                type: type,
-                                onTap: () => _moodProvider.logMood(type),
-                              ))
-                          .toList(),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-
-          // Timeline Section: Full Width of the screen
-          Container(
-            padding: const EdgeInsets.symmetric(vertical: 32),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.03),
-                  blurRadius: 20,
-                  offset: const Offset(0, -10),
-                ),
-              ],
-            ),
+      body: Center(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(vertical: 40),
+          child: Container(
+            constraints: const BoxConstraints(maxWidth: 800),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 24),
-                  child: Text(
-                    'Recent Vibes (Past 7)',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.blueGrey,
-                    ),
+                const Text(
+                  'How are you feeling right now?',
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.blueGrey,
                   ),
                 ),
-                const SizedBox(height: 16),
-                // Timeline List: Uses ListenableBuilder to react to provider changes
+                const SizedBox(height: 40),
+                
+                // Mood Logging Buttons - Now using Wrap for more moods
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  child: Wrap(
+                    spacing: 32,
+                    runSpacing: 32,
+                    alignment: WrapAlignment.center,
+                    children: MoodType.values
+                        .map((type) => _MoodButton(
+                              type: type,
+                              onTap: () => _moodProvider.logMood(type),
+                            ))
+                        .toList(),
+                  ),
+                ),
+                
+                const SizedBox(height: 60),
+                
+                // Timeline Section: Now Centered in the screen flow
+                const Text(
+                  'Recent Vibes (Past 7)',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.blueGrey,
+                  ),
+                ),
+                const SizedBox(height: 24),
+                
                 SizedBox(
-                  height: 220,
+                  height: 240,
                   child: ListenableBuilder(
                     listenable: _moodProvider,
                     builder: (context, child) {
@@ -134,6 +116,7 @@ class _MoodTrackerHomeState extends State<MoodTrackerHome> {
 
                       return ListView.builder(
                         scrollDirection: Axis.horizontal,
+                        shrinkWrap: true,
                         padding: const EdgeInsets.symmetric(horizontal: 16),
                         physics: const BouncingScrollPhysics(),
                         itemCount: entries.length,
@@ -147,7 +130,7 @@ class _MoodTrackerHomeState extends State<MoodTrackerHome> {
               ],
             ),
           ),
-        ],
+        ),
       ),
     );
   }
@@ -175,7 +158,7 @@ class _MoodButton extends StatelessWidget {
                 border: Border.all(color: type.color.withOpacity(0.2), width: 2),
               ),
               child: CustomPaint(
-                size: const Size(85, 85),
+                size: const Size(80, 80),
                 painter: MoodPainter(moodType: type),
               ),
             ),

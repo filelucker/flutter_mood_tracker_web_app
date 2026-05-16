@@ -3,16 +3,25 @@ import 'package:flutter/material.dart';
 enum MoodType {
   happy,
   neutral,
-  sad;
+  sad,
+  excited,
+  tired,
+  angry;
 
   Color get color {
     switch (this) {
       case MoodType.happy:
-        return Colors.green; // Emerald/Green
+        return Colors.green;
       case MoodType.neutral:
-        return Colors.amber; // Amber/Yellow
+        return Colors.amber;
       case MoodType.sad:
-        return Colors.indigo; // Indigo/Blue
+        return Colors.indigo;
+      case MoodType.excited:
+        return Colors.orange;
+      case MoodType.tired:
+        return Colors.blueGrey;
+      case MoodType.angry:
+        return Colors.red;
     }
   }
 
@@ -24,6 +33,12 @@ enum MoodType {
         return 'Neutral';
       case MoodType.sad:
         return 'Sad';
+      case MoodType.excited:
+        return 'Excited';
+      case MoodType.tired:
+        return 'Tired';
+      case MoodType.angry:
+        return 'Angry';
     }
   }
 }
