@@ -74,13 +74,14 @@ class _MoodTrackerHomeState extends State<MoodTrackerHome> {
         child: SafeArea(
           child: Center(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(vertical: 48, horizontal: 20),
-              child: Container(
-                constraints: const BoxConstraints(maxWidth: 700),
-                child: Column(
-                  children: [
-                    // Header Section
-                    Column(
+              padding: const EdgeInsets.symmetric(vertical: 48),
+              child: Column(
+                children: [
+                  // Header Section (Bounded)
+                  Container(
+                    constraints: const BoxConstraints(maxWidth: 700),
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Column(
                       children: [
                         Text(
                           _greeting,
@@ -99,10 +100,14 @@ class _MoodTrackerHomeState extends State<MoodTrackerHome> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 56),
+                  ),
+                  const SizedBox(height: 56),
 
-                    // Mood Selector Card
-                    Container(
+                  // Mood Selector (Single Line, Scrollable if needed)
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Container(
                       padding: const EdgeInsets.all(40),
                       decoration: BoxDecoration(
                         color: Colors.white.withOpacity(0.7),
@@ -116,81 +121,97 @@ class _MoodTrackerHomeState extends State<MoodTrackerHome> {
                           ),
                         ],
                       ),
-                      child: Wrap(
-                        spacing: 24,
-                        runSpacing: 24,
-                        alignment: WrapAlignment.center,
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
                         children: MoodType.values
-                            .map((type) => _MoodButton(
-                                  type: type,
-                                  onTap: () => _moodProvider.logMood(type),
+                            .map((type) => Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                                  child: _MoodButton(
+                                    type: type,
+                                    onTap: () => _moodProvider.logMood(type),
+                                  ),
                                 ))
                             .toList(),
                       ),
                     ),
+                  ),
 
-                    const SizedBox(height: 64),
+                  const SizedBox(height: 64),
 
-                    // History Section
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Padding(
-                          padding: EdgeInsets.only(left: 8, bottom: 20),
-                          child: Text(
-                            'Your Recent Journey',
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.w800,
-                              color: Color(0xFF475569),
+                  // History Section (Full Width)
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        child: Container(
+                          constraints: const BoxConstraints(maxWidth: 700),
+                          child: const Padding(
+                            padding: EdgeInsets.only(left: 8, bottom: 20),
+                            child: Text(
+                              'Your Recent Journey',
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.w800,
+                                color: Color(0xFF475569),
+                              ),
                             ),
                           ),
                         ),
-                        SizedBox(
-                          height: 220,
-                          child: ListenableBuilder(
-                            listenable: _moodProvider,
-                            builder: (context, child) {
-                              final entries = _moodProvider.lastSevenEntries;
+                      ),
+                      SizedBox(
+                        height: 240,
+                        width: double.infinity,
+                        child: ListenableBuilder(
+                          listenable: _moodProvider,
+                          builder: (context, child) {
+                            final entries = _moodProvider.lastSevenEntries;
 
-                              if (entries.isEmpty) {
-                                return Container(
-                                  width: double.infinity,
-                                  decoration: BoxDecoration(
-                                    color: Colors.white.withOpacity(0.4),
-                                    borderRadius: BorderRadius.circular(24),
-                                    border: Border.all(
-                                      color: Colors.white.withOpacity(0.5),
+                            if (entries.isEmpty) {
+                              return Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 20),
+                                child: Center(
+                                  child: Container(
+                                    constraints: const BoxConstraints(maxWidth: 700),
+                                    width: double.infinity,
+                                    height: 180,
+                                    decoration: BoxDecoration(
+                                      color: Colors.white.withOpacity(0.4),
+                                      borderRadius: BorderRadius.circular(24),
+                                      border: Border.all(
+                                        color: Colors.white.withOpacity(0.5),
+                                      ),
                                     ),
-                                  ),
-                                  child: const Center(
-                                    child: Text(
-                                      'Your timeline is empty. Log a mood to start!',
-                                      style: TextStyle(
-                                        color: Color(0xFF94A3B8),
-                                        fontStyle: FontStyle.italic,
-                                        fontWeight: FontWeight.w500,
+                                    child: const Center(
+                                      child: Text(
+                                        'Your timeline is empty. Log a mood to start!',
+                                        style: TextStyle(
+                                          color: Color(0xFF94A3B8),
+                                          fontStyle: FontStyle.italic,
+                                          fontWeight: FontWeight.w500,
+                                        ),
                                       ),
                                     ),
                                   ),
-                                );
-                              }
-
-                              return ListView.builder(
-                                scrollDirection: Axis.horizontal,
-                                physics: const BouncingScrollPhysics(),
-                                itemCount: entries.length,
-                                itemBuilder: (context, index) {
-                                  return TimelineCard(entry: entries[index]);
-                                },
+                                ),
                               );
-                            },
-                          ),
+                            }
+
+                            return ListView.builder(
+                              scrollDirection: Axis.horizontal,
+                              padding: const EdgeInsets.symmetric(horizontal: 20),
+                              physics: const BouncingScrollPhysics(),
+                              itemCount: entries.length,
+                              itemBuilder: (context, index) {
+                                return TimelineCard(entry: entries[index]);
+                              },
+                            );
+                          },
                         ),
-                      ],
-                    ),
-                  ],
-                ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ),
           ),
