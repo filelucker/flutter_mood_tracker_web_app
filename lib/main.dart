@@ -97,7 +97,7 @@ class _MoodTrackerHomeState extends State<MoodTrackerHome> {
                   offset: const Offset(0, -10),
                 ),
               ],
-            ],
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
