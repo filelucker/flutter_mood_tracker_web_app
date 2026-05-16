@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'models/mood_model.dart';
 import 'painters/mood_painter.dart';
@@ -16,6 +17,15 @@ class MoodTrackerApp extends StatelessWidget {
     return MaterialApp(
       title: 'VibeCheck',
       debugShowCheckedModeBanner: false,
+      // Enable mouse drag scrolling for a better web experience
+      scrollBehavior: const MaterialScrollBehavior().copyWith(
+        dragDevices: {
+          PointerDeviceKind.mouse,
+          PointerDeviceKind.touch,
+          PointerDeviceKind.stylus,
+          PointerDeviceKind.unknown
+        },
+      ),
       theme: ThemeData(
         useMaterial3: true,
         colorSchemeSeed: const Color(0xFF6366F1), // Modern Indigo
@@ -104,34 +114,37 @@ class _MoodTrackerHomeState extends State<MoodTrackerHome> {
                   const SizedBox(height: 56),
 
                   // Mood Selector (Single Line, Scrollable if needed)
-                  SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: Container(
-                      padding: const EdgeInsets.all(40),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.7),
-                        borderRadius: BorderRadius.circular(32),
-                        border: Border.all(color: Colors.white, width: 2),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.indigo.withOpacity(0.05),
-                            blurRadius: 40,
-                            offset: const Offset(0, 20),
-                          ),
-                        ],
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: MoodType.values
-                            .map((type) => Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                                  child: _MoodButton(
-                                    type: type,
-                                    onTap: () => _moodProvider.logMood(type),
-                                  ),
-                                ))
-                            .toList(),
+                  Scrollbar(
+                    thumbVisibility: true,
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                      child: Container(
+                        padding: const EdgeInsets.all(40),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.7),
+                          borderRadius: BorderRadius.circular(32),
+                          border: Border.all(color: Colors.white, width: 2),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.indigo.withOpacity(0.05),
+                              blurRadius: 40,
+                              offset: const Offset(0, 20),
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: MoodType.values
+                              .map((type) => Padding(
+                                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                                    child: _MoodButton(
+                                      type: type,
+                                      onTap: () => _moodProvider.logMood(type),
+                                    ),
+                                  ))
+                              .toList(),
+                        ),
                       ),
                     ),
                   ),
@@ -160,7 +173,7 @@ class _MoodTrackerHomeState extends State<MoodTrackerHome> {
                         ),
                       ),
                       SizedBox(
-                        height: 240,
+                        height: 260,
                         width: double.infinity,
                         child: ListenableBuilder(
                           listenable: _moodProvider,
@@ -197,14 +210,17 @@ class _MoodTrackerHomeState extends State<MoodTrackerHome> {
                               );
                             }
 
-                            return ListView.builder(
-                              scrollDirection: Axis.horizontal,
-                              padding: const EdgeInsets.symmetric(horizontal: 20),
-                              physics: const BouncingScrollPhysics(),
-                              itemCount: entries.length,
-                              itemBuilder: (context, index) {
-                                return TimelineCard(entry: entries[index]);
-                              },
+                            return Scrollbar(
+                              thumbVisibility: true,
+                              child: ListView.builder(
+                                scrollDirection: Axis.horizontal,
+                                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                                physics: const BouncingScrollPhysics(),
+                                itemCount: entries.length,
+                                itemBuilder: (context, index) {
+                                  return TimelineCard(entry: entries[index]);
+                                },
+                              ),
                             );
                           },
                         ),
