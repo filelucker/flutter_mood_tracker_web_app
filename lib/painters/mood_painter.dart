@@ -30,7 +30,7 @@ class MoodPainter extends CustomPainter {
     final strokePaint = Paint()
       ..color = color
       ..style = PaintingStyle.stroke
-      ..strokeWidth = radius * 0.08
+      ..strokeWidth = radius * 0.07
       ..strokeCap = StrokeCap.round;
 
     final eyePaint = Paint()

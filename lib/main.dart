@@ -14,12 +14,25 @@ class MoodTrackerApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Vector Mood Tracker',
+      title: 'VibeCheck',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         useMaterial3: true,
-        colorSchemeSeed: Colors.teal,
-        scaffoldBackgroundColor: const Color(0xFFF8FAF9),
+        colorSchemeSeed: const Color(0xFF6366F1), // Modern Indigo
+        brightness: Brightness.light,
+        scaffoldBackgroundColor: const Color(0xFFF1F5F9), // Slate 100
+        textTheme: const TextTheme(
+          displaySmall: TextStyle(
+            fontWeight: FontWeight.w900,
+            color: Color(0xFF1E293B),
+            letterSpacing: -0.5,
+          ),
+          titleLarge: TextStyle(
+            fontWeight: FontWeight.w800,
+            color: Color(0xFF334155),
+            letterSpacing: -0.2,
+          ),
+        ),
       ),
       home: const MoodTrackerHome(),
     );
@@ -34,100 +47,151 @@ class MoodTrackerHome extends StatefulWidget {
 }
 
 class _MoodTrackerHomeState extends State<MoodTrackerHome> {
-  // Native state management: local instance of ChangeNotifier
   final MoodProvider _moodProvider = MoodProvider();
+
+  String get _greeting {
+    final hour = DateTime.now().hour;
+    if (hour < 12) return 'Good Morning';
+    if (hour < 17) return 'Good Afternoon';
+    return 'Good Evening';
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          'Mood Tracker',
-          style: TextStyle(fontWeight: FontWeight.w900, letterSpacing: 1.2),
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Color(0xFFEEF2FF),
+              Color(0xFFE0E7FF),
+              Color(0xFFF1F5F9),
+            ],
+          ),
         ),
-        centerTitle: true,
-        elevation: 0,
-        backgroundColor: Colors.transparent,
-      ),
-      body: Center(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(vertical: 40),
-          child: Container(
-            constraints: const BoxConstraints(maxWidth: 800),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Text(
-                  'How are you feeling right now?',
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.blueGrey,
-                  ),
-                ),
-                const SizedBox(height: 40),
-                
-                // Mood Logging Buttons - Now using Wrap for more moods
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24),
-                  child: Wrap(
-                    spacing: 32,
-                    runSpacing: 32,
-                    alignment: WrapAlignment.center,
-                    children: MoodType.values
-                        .map((type) => _MoodButton(
-                              type: type,
-                              onTap: () => _moodProvider.logMood(type),
-                            ))
-                        .toList(),
-                  ),
-                ),
-                
-                const SizedBox(height: 60),
-                
-                // Timeline Section: Now Centered in the screen flow
-                const Text(
-                  'Recent Vibes (Past 7)',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.blueGrey,
-                  ),
-                ),
-                const SizedBox(height: 24),
-                
-                SizedBox(
-                  height: 240,
-                  child: ListenableBuilder(
-                    listenable: _moodProvider,
-                    builder: (context, child) {
-                      final entries = _moodProvider.lastSevenEntries;
+        child: SafeArea(
+          child: Center(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(vertical: 48, horizontal: 20),
+              child: Container(
+                constraints: const BoxConstraints(maxWidth: 700),
+                child: Column(
+                  children: [
+                    // Header Section
+                    Column(
+                      children: [
+                        Text(
+                          _greeting,
+                          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                color: const Color(0xFF6366F1),
+                                fontSize: 18,
+                              ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'How is your vibe today?',
+                          textAlign: TextAlign.center,
+                          style: Theme.of(context).textTheme.displaySmall?.copyWith(
+                                fontSize: 32,
+                              ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 56),
 
-                      if (entries.isEmpty) {
-                        return const Center(
-                          child: Text(
-                            'No entries yet. Tap a face above to start!',
-                            style: TextStyle(
-                                color: Colors.grey,
-                                fontStyle: FontStyle.italic),
+                    // Mood Selector Card
+                    Container(
+                      padding: const EdgeInsets.all(40),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.7),
+                        borderRadius: BorderRadius.circular(32),
+                        border: Border.all(color: Colors.white, width: 2),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.indigo.withOpacity(0.05),
+                            blurRadius: 40,
+                            offset: const Offset(0, 20),
                           ),
-                        );
-                      }
+                        ],
+                      ),
+                      child: Wrap(
+                        spacing: 24,
+                        runSpacing: 24,
+                        alignment: WrapAlignment.center,
+                        children: MoodType.values
+                            .map((type) => _MoodButton(
+                                  type: type,
+                                  onTap: () => _moodProvider.logMood(type),
+                                ))
+                            .toList(),
+                      ),
+                    ),
 
-                      return ListView.builder(
-                        scrollDirection: Axis.horizontal,
-                        shrinkWrap: true,
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        physics: const BouncingScrollPhysics(),
-                        itemCount: entries.length,
-                        itemBuilder: (context, index) {
-                          return TimelineCard(entry: entries[index]);
-                        },
-                      );
-                    },
-                  ),
+                    const SizedBox(height: 64),
+
+                    // History Section
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Padding(
+                          padding: EdgeInsets.only(left: 8, bottom: 20),
+                          child: Text(
+                            'Your Recent Journey',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w800,
+                              color: Color(0xFF475569),
+                            ),
+                          ),
+                        ),
+                        SizedBox(
+                          height: 220,
+                          child: ListenableBuilder(
+                            listenable: _moodProvider,
+                            builder: (context, child) {
+                              final entries = _moodProvider.lastSevenEntries;
+
+                              if (entries.isEmpty) {
+                                return Container(
+                                  width: double.infinity,
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withOpacity(0.4),
+                                    borderRadius: BorderRadius.circular(24),
+                                    border: Border.all(
+                                      color: Colors.white.withOpacity(0.5),
+                                    ),
+                                  ),
+                                  child: const Center(
+                                    child: Text(
+                                      'Your timeline is empty. Log a mood to start!',
+                                      style: TextStyle(
+                                        color: Color(0xFF94A3B8),
+                                        fontStyle: FontStyle.italic,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              }
+
+                              return ListView.builder(
+                                scrollDirection: Axis.horizontal,
+                                physics: const BouncingScrollPhysics(),
+                                itemCount: entries.length,
+                                itemBuilder: (context, index) {
+                                  return TimelineCard(entry: entries[index]);
+                                },
+                              );
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
           ),
         ),
@@ -136,44 +200,65 @@ class _MoodTrackerHomeState extends State<MoodTrackerHome> {
   }
 }
 
-class _MoodButton extends StatelessWidget {
+class _MoodButton extends StatefulWidget {
   final MoodType type;
   final VoidCallback onTap;
 
   const _MoodButton({required this.type, required this.onTap});
 
   @override
+  State<_MoodButton> createState() => _MoodButtonState();
+}
+
+class _MoodButtonState extends State<_MoodButton> {
+  bool _isHovered = false;
+
+  @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        GestureDetector(
-          onTap: onTap,
-          child: MouseRegion(
-            cursor: SystemMouseCursors.click,
-            child: Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: type.color.withOpacity(0.05),
-                shape: BoxShape.circle,
-                border: Border.all(color: type.color.withOpacity(0.2), width: 2),
+    return MouseRegion(
+      onEnter: (_) => setState(() => _isHovered = true),
+      onExit: (_) => setState(() => _isHovered = false),
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        onTap: widget.onTap,
+        child: AnimatedScale(
+          scale: _isHovered ? 1.1 : 1.0,
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeOutBack,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: widget.type.color.withOpacity(0.08),
+                  borderRadius: BorderRadius.circular(24),
+                  border: Border.all(
+                    color: _isHovered
+                        ? widget.type.color.withOpacity(0.4)
+                        : widget.type.color.withOpacity(0.1),
+                    width: 2,
+                  ),
+                ),
+                child: CustomPaint(
+                  size: const Size(60, 60),
+                  painter: MoodPainter(moodType: widget.type),
+                ),
               ),
-              child: CustomPaint(
-                size: const Size(80, 80),
-                painter: MoodPainter(moodType: type),
+              const SizedBox(height: 12),
+              Text(
+                widget.type.label,
+                style: TextStyle(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 13,
+                  color: widget.type.color.withOpacity(0.9),
+                  letterSpacing: 0.2,
+                ),
               ),
-            ),
+            ],
           ),
         ),
-        const SizedBox(height: 12),
-        Text(
-          type.label,
-          style: TextStyle(
-            fontWeight: FontWeight.w800,
-            color: type.color.withOpacity(0.8),
-            letterSpacing: 0.5,
-          ),
-        ),
-      ],
+      ),
     );
   }
 }
