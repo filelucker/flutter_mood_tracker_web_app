@@ -162,7 +162,7 @@ class _MoodTrackerHomeState extends State<MoodTrackerHome> {
                           child: const Padding(
                             padding: EdgeInsets.only(left: 8, bottom: 20),
                             child: Text(
-                              'Your Recent Journey',
+                              'Your Recent Journey (Last 7)',
                               style: TextStyle(
                                 fontSize: 20,
                                 fontWeight: FontWeight.w800,
