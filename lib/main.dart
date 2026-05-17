@@ -139,15 +139,30 @@ class _HeaderSection extends StatelessWidget {
   }
 }
 
-class _MoodSelector extends StatelessWidget {
+class _MoodSelector extends StatefulWidget {
   final Function(MoodType) onMoodSelected;
   const _MoodSelector({required this.onMoodSelected});
 
   @override
+  State<_MoodSelector> createState() => _MoodSelectorState();
+}
+
+class _MoodSelectorState extends State<_MoodSelector> {
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scrollbar(
+      controller: _scrollController,
       thumbVisibility: true,
       child: SingleChildScrollView(
+        controller: _scrollController,
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
         child: Container(
@@ -171,7 +186,7 @@ class _MoodSelector extends StatelessWidget {
                       padding: const EdgeInsets.symmetric(horizontal: 12),
                       child: _MoodButton(
                         type: type,
-                        onTap: () => onMoodSelected(type),
+                        onTap: () => widget.onMoodSelected(type),
                       ),
                     ))
                 .toList(),
@@ -182,9 +197,22 @@ class _MoodSelector extends StatelessWidget {
   }
 }
 
-class _HistorySection extends StatelessWidget {
+class _HistorySection extends StatefulWidget {
   final List<MoodEntry> entries;
   const _HistorySection({required this.entries});
+
+  @override
+  State<_HistorySection> createState() => _HistorySectionState();
+}
+
+class _HistorySectionState extends State<_HistorySection> {
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -211,16 +239,18 @@ class _HistorySection extends StatelessWidget {
         SizedBox(
           height: 260,
           width: double.infinity,
-          child: entries.isEmpty
+          child: widget.entries.isEmpty
               ? _EmptyHistoryState()
               : Scrollbar(
+                  controller: _scrollController,
                   thumbVisibility: true,
                   child: ListView.builder(
+                    controller: _scrollController,
                     scrollDirection: Axis.horizontal,
                     padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                     physics: const BouncingScrollPhysics(),
-                    itemCount: entries.length,
-                    itemBuilder: (context, index) => TimelineCard(entry: entries[index]),
+                    itemCount: widget.entries.length,
+                    itemBuilder: (context, index) => TimelineCard(entry: widget.entries[index]),
                   ),
                 ),
         ),
