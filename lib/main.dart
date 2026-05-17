@@ -17,7 +17,6 @@ class MoodTrackerApp extends StatelessWidget {
     return MaterialApp(
       title: 'VibeCheck',
       debugShowCheckedModeBanner: false,
-      // Enable mouse drag scrolling for a better web experience
       scrollBehavior: const MaterialScrollBehavior().copyWith(
         dragDevices: {
           PointerDeviceKind.mouse,
@@ -28,9 +27,9 @@ class MoodTrackerApp extends StatelessWidget {
       ),
       theme: ThemeData(
         useMaterial3: true,
-        colorSchemeSeed: const Color(0xFF6366F1), // Modern Indigo
+        colorSchemeSeed: const Color(0xFF6366F1),
         brightness: Brightness.light,
-        scaffoldBackgroundColor: const Color(0xFFF1F5F9), // Slate 100
+        scaffoldBackgroundColor: const Color(0xFFF1F5F9),
         textTheme: const TextTheme(
           displaySmall: TextStyle(
             fontWeight: FontWeight.w900,
@@ -57,14 +56,8 @@ class MoodTrackerHome extends StatefulWidget {
 }
 
 class _MoodTrackerHomeState extends State<MoodTrackerHome> {
+  // Controller instance that holds the business logic
   final MoodProvider _moodProvider = MoodProvider();
-
-  String get _greeting {
-    final hour = DateTime.now().hour;
-    if (hour < 12) return 'Good Morning';
-    if (hour < 17) return 'Good Afternoon';
-    return 'Good Evening';
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -83,151 +76,181 @@ class _MoodTrackerHomeState extends State<MoodTrackerHome> {
         ),
         child: SafeArea(
           child: Center(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(vertical: 48),
-              child: Column(
-                children: [
-                  // Header Section (Bounded)
-                  Container(
-                    constraints: const BoxConstraints(maxWidth: 700),
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: Column(
-                      children: [
-                        Text(
-                          _greeting,
-                          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                color: const Color(0xFF6366F1),
-                                fontSize: 18,
-                              ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'How is your vibe today?',
-                          textAlign: TextAlign.center,
-                          style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                                fontSize: 32,
-                              ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 56),
-
-                  // Mood Selector (Single Line, Scrollable if needed)
-                  Scrollbar(
-                    thumbVisibility: true,
-                    child: SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                      child: Container(
-                        padding: const EdgeInsets.all(40),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.7),
-                          borderRadius: BorderRadius.circular(32),
-                          border: Border.all(color: Colors.white, width: 2),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.indigo.withOpacity(0.05),
-                              blurRadius: 40,
-                              offset: const Offset(0, 20),
-                            ),
-                          ],
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: MoodType.values
-                              .map((type) => Padding(
-                                    padding: const EdgeInsets.symmetric(horizontal: 12),
-                                    child: _MoodButton(
-                                      type: type,
-                                      onTap: () => _moodProvider.logMood(type),
-                                    ),
-                                  ))
-                              .toList(),
-                        ),
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 64),
-
-                  // History Section (Full Width)
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+            child: ListenableBuilder(
+              listenable: _moodProvider,
+              builder: (context, _) {
+                return SingleChildScrollView(
+                  padding: const EdgeInsets.symmetric(vertical: 48),
+                  child: Column(
                     children: [
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 20),
-                        child: Container(
-                          constraints: const BoxConstraints(maxWidth: 700),
-                          child: const Padding(
-                            padding: EdgeInsets.only(left: 8, bottom: 20),
-                            child: Text(
-                              'Your Recent Journey (Last 7)',
-                              style: TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.w800,
-                                color: Color(0xFF475569),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                      SizedBox(
-                        height: 260,
-                        width: double.infinity,
-                        child: ListenableBuilder(
-                          listenable: _moodProvider,
-                          builder: (context, child) {
-                            final entries = _moodProvider.lastSevenEntries;
+                      // Header Section (Pure UI rendering based on Provider data)
+                      _HeaderSection(greeting: _moodProvider.greeting),
+                      const SizedBox(height: 56),
 
-                            if (entries.isEmpty) {
-                              return Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 20),
-                                child: Center(
-                                  child: Container(
-                                    constraints: const BoxConstraints(maxWidth: 700),
-                                    width: double.infinity,
-                                    height: 180,
-                                    decoration: BoxDecoration(
-                                      color: Colors.white.withOpacity(0.4),
-                                      borderRadius: BorderRadius.circular(24),
-                                      border: Border.all(
-                                        color: Colors.white.withOpacity(0.5),
-                                      ),
-                                    ),
-                                    child: const Center(
-                                      child: Text(
-                                        'Your timeline is empty. Log a mood to start!',
-                                        style: TextStyle(
-                                          color: Color(0xFF94A3B8),
-                                          fontStyle: FontStyle.italic,
-                                          fontWeight: FontWeight.w500,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              );
-                            }
-
-                            return Scrollbar(
-                              thumbVisibility: true,
-                              child: ListView.builder(
-                                scrollDirection: Axis.horizontal,
-                                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                                physics: const BouncingScrollPhysics(),
-                                itemCount: entries.length,
-                                itemBuilder: (context, index) {
-                                  return TimelineCard(entry: entries[index]);
-                                },
-                              ),
-                            );
-                          },
-                        ),
+                      // Mood Selector (Input actions delegated to Provider)
+                      _MoodSelector(
+                        onMoodSelected: _moodProvider.logMood,
                       ),
+                      const SizedBox(height: 64),
+
+                      // History Section (Data sourced from Provider)
+                      _HistorySection(entries: _moodProvider.lastSevenEntries),
                     ],
                   ),
-                ],
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _HeaderSection extends StatelessWidget {
+  final String greeting;
+  const _HeaderSection({required this.greeting});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      constraints: const BoxConstraints(maxWidth: 700),
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Column(
+        children: [
+          Text(
+            greeting,
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  color: const Color(0xFF6366F1),
+                  fontSize: 18,
+                ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'How is your vibe today?',
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.displaySmall?.copyWith(
+                  fontSize: 32,
+                ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _MoodSelector extends StatelessWidget {
+  final Function(MoodType) onMoodSelected;
+  const _MoodSelector({required this.onMoodSelected});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scrollbar(
+      thumbVisibility: true,
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+        child: Container(
+          padding: const EdgeInsets.all(40),
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.7),
+            borderRadius: BorderRadius.circular(32),
+            border: Border.all(color: Colors.white, width: 2),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.indigo.withOpacity(0.05),
+                blurRadius: 40,
+                offset: const Offset(0, 20),
+              ),
+            ],
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: MoodType.values
+                .map((type) => Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      child: _MoodButton(
+                        type: type,
+                        onTap: () => onMoodSelected(type),
+                      ),
+                    ))
+                .toList(),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _HistorySection extends StatelessWidget {
+  final List<MoodEntry> entries;
+  const _HistorySection({required this.entries});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: Container(
+            constraints: const BoxConstraints(maxWidth: 700),
+            child: const Padding(
+              padding: EdgeInsets.only(left: 8, bottom: 20),
+              child: Text(
+                'Your Recent Journey (Last 7)',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w800,
+                  color: Color(0xFF475569),
+                ),
+              ),
+            ),
+          ),
+        ),
+        SizedBox(
+          height: 260,
+          width: double.infinity,
+          child: entries.isEmpty
+              ? _EmptyHistoryState()
+              : Scrollbar(
+                  thumbVisibility: true,
+                  child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                    physics: const BouncingScrollPhysics(),
+                    itemCount: entries.length,
+                    itemBuilder: (context, index) => TimelineCard(entry: entries[index]),
+                  ),
+                ),
+        ),
+      ],
+    );
+  }
+}
+
+class _EmptyHistoryState extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Center(
+        child: Container(
+          constraints: const BoxConstraints(maxWidth: 700),
+          width: double.infinity,
+          height: 180,
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.4),
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(color: Colors.white.withOpacity(0.5)),
+          ),
+          child: const Center(
+            child: Text(
+              'Your timeline is empty. Log a mood to start!',
+              style: TextStyle(
+                color: Color(0xFF94A3B8),
+                fontStyle: FontStyle.italic,
+                fontWeight: FontWeight.w500,
               ),
             ),
           ),

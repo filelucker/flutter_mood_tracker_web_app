@@ -9,12 +9,18 @@ class MoodProvider extends ChangeNotifier {
 
   // Requirement: Explicitly return only the past 7 entries, newest first
   List<MoodEntry> get lastSevenEntries {
-    // _entries is already "latest first" if we use .insert(0, ...)
-    // but we'll ensure sorting just in case
     final sorted = List<MoodEntry>.from(_entries)
       ..sort((a, b) => b.timestamp.compareTo(a.timestamp));
     
     return sorted.take(7).toList();
+  }
+
+  // Business Logic: Determine greeting based on current time
+  String get greeting {
+    final hour = DateTime.now().hour;
+    if (hour < 12) return 'Good Morning';
+    if (hour < 17) return 'Good Afternoon';
+    return 'Good Evening';
   }
 
   void logMood(MoodType type) {

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/mood_model.dart';
 import '../painters/mood_painter.dart';
+import '../utils/date_utils.dart';
 
 class TimelineCard extends StatefulWidget {
   final MoodEntry entry;
@@ -47,8 +48,9 @@ class _TimelineCardState extends State<TimelineCard> with SingleTickerProviderSt
 
   @override
   Widget build(BuildContext context) {
-    final timeStr = "${widget.entry.timestamp.hour}:${widget.entry.timestamp.minute.toString().padLeft(2, '0')}";
-    final dayName = _getShortDayName(widget.entry.timestamp.weekday);
+    // UI strings now sourced from utility class
+    final timeStr = DateFormatter.formatTime(widget.entry.timestamp);
+    final dayName = DateFormatter.getShortDayName(widget.entry.timestamp.weekday);
 
     return GestureDetector(
       onTap: _onTap,
@@ -125,18 +127,5 @@ class _TimelineCardState extends State<TimelineCard> with SingleTickerProviderSt
         },
       ),
     );
-  }
-
-  String _getShortDayName(int weekday) {
-    switch (weekday) {
-      case 1: return 'MON';
-      case 2: return 'TUE';
-      case 3: return 'WED';
-      case 4: return 'THU';
-      case 5: return 'FRI';
-      case 6: return 'SAT';
-      case 7: return 'SUN';
-      default: return '';
-    }
   }
 }
